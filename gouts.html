@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flavolo Quizz – Goûts &amp; Saveurs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bangers&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="theme-checker.css">
+  <link rel="stylesheet" href="heroes.css">
+</head>
+<body>
+  <!-- Filtre SVG qui fait onduler le damier -->
+  <svg width="0" height="0" style="position:absolute">
+    <filter id="wave" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.0035" numOctaves="2" seed="4"/>
+      <feDisplacementMap in="SourceGraphic" scale="170"/>
+    </filter>
+  </svg>
+
+  <div id="stage" class="phase-intro theme-checker">
+    <!-- Fond : damier violet ondulé -->
+    <div class="bg"><div class="checker"></div></div>
+
+    <!-- Grande carte blanche + logo animé en haut à gauche -->
+    <div class="panel"></div>
+    <div class="brand">
+      <img class="logo-img" src="images/logo.png" alt="Flavolo Quizz">
+    </div>
+
+    <!-- Numéro de question -->
+    <div class="badge" id="badge">1</div>
+    <div class="counter" id="counter">QUESTION 1 / 10</div>
+
+    <!-- Score et combo -->
+    <div class="hud">
+      <div class="hud-score"><svg viewBox="0 0 24 24"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6z"/></svg><b id="scoreVal">0</b></div>
+      <div class="hud-combo" id="combo"></div>
+    </div>
+
+    <!-- Écran d'intro -->
+    <section class="screen intro">
+      <!-- Animation d'entrée : le logo rebondit, entouré d'étincelles -->
+      <!-- Trois super-héros 3D accueillent les joueurs -->
+      <div class="intro-hero left" data-key="sweet"></div>
+      <div class="intro-hero right" data-key="spicy"></div>
+      <div class="logo-hero">
+        <div class="sparks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <img class="logo-img" src="images/logo.png" alt="Flavolo Quizz">
+      </div>
+      <p class="intro-tagline">GOÛTS <span>&amp;</span> SAVEURS</p>
+      <p class="intro-mission">Deviens un <b>SUPER-HÉROS DU GOÛT</b> et débloque les 10 héros !</p>
+      <p class="intro-sub" id="introSub">10 QUESTIONS · 15 SECONDES</p>
+      <button class="btn" id="startBtn">▶ JOUER</button>
+      <p class="hint">Flèches : guider le héros · Entrée : passer le vol · Espace : pause · F : plein écran · M : son</p>
+      <p class="hint pad-hint">Manette : A jouer / valider · stick ou croix : piloter et choisir · Start pause · View passer le vol</p>
+    </section>
+
+    <!-- Écran d'annonce d'une partie (goûts, puis saveurs) -->
+    <section class="screen part">
+      <div class="confetti"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <img class="logo-img part-logo" src="images/logo.png" alt="Flavolo Quizz">
+      <div class="part-tag" id="partTag">PARTIE 1</div>
+      <h1 class="part-title" id="partTitle">LES GOÛTS</h1>
+      <p class="part-sub" id="partSub"></p>
+    </section>
+
+    <!-- Écran question -->
+    <section class="screen question">
+      <h2 class="q-text" id="qText"></h2>
+
+      <div class="q-body">
+        <div class="hero3d" id="hero3d"></div>
+        <div class="options" id="options"></div>
+      </div>
+
+      <!-- Réponse : le modèle 3D en grand, centré, avec juste la réponse -->
+      <div class="explain split">
+        <div class="answer3d" id="answer3d"></div>
+        <!-- Fiche du super-héros (à gauche) -->
+        <div class="hero-sheet">
+          <div class="hero-ribbon" id="heroRibbon">HÉROS DÉBLOQUÉ !</div>
+          <div class="hero-name" id="heroName"></div>
+          <p class="hero-power" id="heroPower"></p>
+          <div class="hero-gauges" id="heroGauges"></div>
+        </div>
+        <!-- Bulle de BD avec l'explication (à droite) -->
+        <div class="hero-bubble"><p id="heroSays"></p></div>
+        <div class="explain-col">
+          <div class="answer-big" id="answerBig"></div>
+          <div class="card">
+            <span class="chip">💡 EXPLICATION FLASH</span>
+            <p id="explainText"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="timer"><div class="timer-fill" id="timerFill"></div></div>
+    </section>
+
+    <!-- Écran de fin -->
+    <section class="screen end">
+      <div class="end-left">
+        <h1 class="end-title" id="endTitle">BRAVO !</h1>
+        <div class="end-stars" id="endStars"><i></i><i></i><i></i></div>
+        <div class="end-score" id="endScore"></div>
+        <p class="intro-sub" id="scoreText"></p>
+        <button class="btn" id="restartBtn">↻ REJOUER</button>
+      </div>
+      <div class="end-right">
+        <div class="album-title">MON ALBUM DE HÉROS <span id="albumCount"></span></div>
+        <div class="album" id="album"></div>
+      </div>
+    </section>
+
+    <div class="paused-flag">⏸ PAUSE</div>
+
+    <!-- Vol du héros jusqu'à la ligne du quiz (vol.js) -->
+    <div class="flight" id="flight"></div>
+
+    <!-- Effets spéciaux : confettis, étincelles, feux d'artifice -->
+    <canvas class="fx" id="fx"></canvas>
+
+    <!-- Bulle de BD « POW ! » -->
+    <div class="pow" id="pow">
+      <svg viewBox="0 0 100 100"><polygon class="pow-back"/><polygon class="pow-front"/></svg>
+      <span></span>
+    </div>
+
+    <!-- Bouton son -->
+    <button class="sound-btn" id="soundBtn" title="Son (M)">
+      <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="cross" d="M16 9l6 6M22 9l-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </button>
+
+    <!-- Transition « vague » -->
+    <div class="splash" id="splash">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path class="s2" d="M12,0 C7,8 15,14 9,22 C4,30 13,36 8,45 C3,55 14,60 9,70 C5,78 13,86 7,100 L95,100 C99,90 89,84 94,75 C99,66 88,58 93,48 C98,38 89,32 94,22 C98,12 89,6 95,0 Z"/>
+        <path class="s1" d="M10,0 C6,8 14,14 8,22 C3,30 12,36 7,45 C2,55 13,60 8,70 C4,78 12,86 6,100 L94,100 C98,90 88,84 93,75 C98,66 87,58 92,48 C97,38 88,32 93,22 C97,12 88,6 94,0 Z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Modèles 3D (Three.js). Pour revenir aux images animées : remplacer par <script src="taste-images.js"></script> -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="taste3d.js"></script>
+  <script type="module" src="vol.js"></script>
+  <script src="questions-gouts.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

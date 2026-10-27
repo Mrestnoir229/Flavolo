@@ -1,0 +1,383 @@
+/* ===== Thème « QUIZ TIME » : damier violet ondulé, carte blanche, pilules violettes =====
+   S'applique uniquement à la scène qui a la classe .theme-checker (gouts.html). */
+
+#stage.theme-checker {
+  --purple: #8a4dff;
+  --purple-dark: #5b2fd6;
+  --lilac: #f3edff;
+  --cream: #fff4f1;
+  --ink: #1c1c1c;
+  --good: #22c55e;
+  --bad: #ef4444;
+  font-family: "Poppins", sans-serif;
+  color: var(--ink);
+}
+
+/* ----- Fond ----- */
+.theme-checker .bg { background: var(--cream); overflow: hidden; }
+.theme-checker .checker {
+  position: absolute;
+  inset: -220px;
+  background: repeating-conic-gradient(var(--purple) 0 25%, var(--cream) 0 50%) 0 0 / 140px 140px;
+  filter: url(#wave);
+}
+
+/* ----- Carte blanche et logo ----- */
+.theme-checker .panel {
+  position: absolute;
+  top: 150px;
+  left: 170px;
+  right: 170px;
+  bottom: 36px;
+  background: #fffdfd;
+  border-radius: 48px;
+  box-shadow: 0 30px 60px rgba(40, 10, 90, .35), 0 8px 18px rgba(40, 10, 90, .2);
+}
+
+.theme-checker .brand {
+  position: absolute;
+  top: 6px;
+  left: 150px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* Le logo en haut : il flotte, se balance et « respire » en continu */
+.theme-checker .brand .logo-img {
+  width: 380px;
+  transform-origin: 50% 60%;
+  animation: brandIn .7s cubic-bezier(.2, 1.5, .4, 1) both, brandIdle 3.4s .7s ease-in-out infinite;
+}
+@keyframes brandIn {
+  from { transform: translateY(-260px) rotate(-14deg) scale(.6); }
+  to   { transform: rotate(-4deg); }
+}
+@keyframes brandIdle {
+  0%, 100% { transform: translateY(0) rotate(-4deg) scale(1); }
+  25%      { transform: translateY(-7px) rotate(-1.5deg) scale(1.03); }
+  50%      { transform: translateY(0) rotate(-5deg) scale(1); }
+  75%      { transform: translateY(-5px) rotate(-2.5deg) scale(1.02); }
+}
+
+/* Toutes les zones de contenu sont à l'intérieur de la carte */
+.theme-checker .screen { top: 200px; left: 200px; right: 200px; bottom: 50px; inset: 200px 200px 50px 200px; }
+
+/* ----- Numéro de question : pastille violette en haut à droite ----- */
+.theme-checker .badge {
+  top: 40px;
+  left: auto;
+  right: 70px;
+  width: 150px;
+  height: 150px;
+  background: var(--purple);
+  border: 8px solid #fff;
+  box-shadow: 0 10px 24px rgba(40, 10, 90, .35);
+  font-family: "Archivo Black", sans-serif;
+  font-size: 66px;
+  color: #fff;
+}
+.theme-checker .counter { display: none; }
+
+.theme-checker .logo {
+  right: 60px;
+  bottom: 60px;
+  padding: 6px 22px;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 30px;
+  color: #fff;
+  background: var(--ink);
+  border-radius: 999px;
+  -webkit-text-stroke: 0;
+  transform: rotate(-6deg);
+}
+
+/* ----- Logo Flavolo Quizz ----- */
+.theme-checker .logo-img { display: block; filter: drop-shadow(0 16px 18px rgba(60, 20, 130, .35)); }
+
+.theme-checker.phase-intro .brand,
+.theme-checker.phase-part .brand,
+.theme-checker.phase-part .badge { display: none; }
+
+/* Animation d'entrée : le logo tombe, rebondit, puis flotte */
+.theme-checker .intro { justify-content: center; }
+.theme-checker .logo-hero { position: relative; width: 800px; }
+.theme-checker .logo-hero .logo-img {
+  position: relative;
+  width: 100%;
+  animation: logoIn 1.2s cubic-bezier(.2, 1.5, .4, 1) both, logoIdle 3.2s 1.2s ease-in-out infinite;
+}
+@keyframes logoIn {
+  0%   { transform: translateY(-700px) scale(.3) rotate(-25deg); opacity: 0; }
+  55%  { transform: translateY(0) scale(1.15, .88) rotate(4deg); opacity: 1; }
+  75%  { transform: translateY(-30px) scale(.96, 1.06) rotate(-2deg); }
+  100% { transform: none; }
+}
+@keyframes logoIdle {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg) scale(1); }
+  50%      { transform: translateY(-16px) rotate(1.5deg) scale(1.03); }
+}
+
+/* Étincelles qui scintillent autour du logo */
+.theme-checker .sparks { position: absolute; left: 50%; top: 50%; }
+.theme-checker .sparks i {
+  position: absolute;
+  width: 46px;
+  aspect-ratio: 1;
+  margin: -23px;
+  background: var(--c);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  animation: spark 2.2s ease-in-out infinite;
+}
+@keyframes spark {
+  0%, 100% { transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(0); }
+  50%      { transform: rotate(var(--a)) translateY(calc(var(--d) * -1)) scale(1) rotate(45deg); }
+}
+
+.theme-checker .intro-tagline {
+  margin-top: 6px;
+  font-family: "Anton", sans-serif;
+  font-size: 84px;
+  line-height: 1;
+  color: var(--ink);
+  animation: riseIn .6s 1s cubic-bezier(.2, 1.3, .4, 1) both;
+}
+.theme-checker .intro-tagline span { color: var(--purple); }
+.theme-checker .intro .intro-sub { margin-top: 14px; font-size: 38px; animation: riseIn .6s 1.15s cubic-bezier(.2, 1.3, .4, 1) both; }
+.theme-checker .intro .btn { margin-top: 26px; animation: riseIn .6s 1.3s cubic-bezier(.2, 1.3, .4, 1) both; }
+
+/* ----- Annonce d'une partie : logo qui claque, confettis, gros titre ----- */
+.theme-checker .part { overflow: visible; }
+.theme-checker .part-logo {
+  width: 520px;
+  animation: partLogo .9s cubic-bezier(.2, 1.5, .4, 1) both, logoIdle 3.2s .9s ease-in-out infinite;
+}
+@keyframes partLogo {
+  0%   { transform: scale(3.2) rotate(30deg); opacity: 0; }
+  60%  { transform: scale(.9) rotate(-5deg); opacity: 1; }
+  100% { transform: none; }
+}
+
+.theme-checker .part-tag {
+  margin-top: 26px;
+  padding: 2px 40px 8px;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 56px;
+  color: var(--purple);
+  background: #fff;
+  border: 5px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 6px 6px 0 var(--ink);
+  animation: tagIn .6s .55s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+@keyframes tagIn { from { transform: translateX(-500px) rotate(-12deg); opacity: 0; } to { transform: rotate(-3deg); opacity: 1; } }
+
+.theme-checker .part-title {
+  margin-top: 8px;
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  font-size: 230px;
+  line-height: 1.05;
+  color: var(--ink);
+  letter-spacing: 2px;
+  animation: zoomIn .7s .8s cubic-bezier(.2, 1.6, .4, 1) both;
+}
+
+.theme-checker .part-sub {
+  font-weight: 600;
+  font-size: 46px;
+  color: var(--purple-dark);
+  animation: riseIn .6s 1.2s cubic-bezier(.2, 1.3, .4, 1) both;
+}
+
+.theme-checker .confetti { position: absolute; left: 50%; top: 22%; }
+.theme-checker .confetti i {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin: -13px;
+  border-radius: 7px;
+  background: var(--c);
+  border: 3px solid var(--ink);
+  animation: burst 1.6s cubic-bezier(.1, .8, .3, 1) both;
+}
+@keyframes burst {
+  0%   { transform: rotate(var(--a)) translateY(0) scale(0); opacity: 1; }
+  70%  { opacity: 1; }
+  100% { transform: rotate(var(--a)) translateY(calc(var(--d) * -2)) scale(1) rotate(260deg); opacity: 0; }
+}
+
+/* ----- Intro / fin ----- */
+.theme-checker .intro-title .line { font-family: "Anton", sans-serif; font-size: 136px; line-height: 1.05; }
+.theme-checker .end .intro-title .line { font-size: 190px; }
+.theme-checker .dark { color: var(--ink); }
+.theme-checker .purple { color: var(--purple); }
+.theme-checker .intro-sub {
+  margin-top: 26px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 46px;
+  color: var(--ink);
+  text-shadow: none;
+}
+.theme-checker .hourglasses { font-size: 90px; margin-top: 16px; }
+.theme-checker .hint { position: static; margin-top: 26px; font-size: 22px; color: #6b6b7b; font-family: "Poppins", sans-serif; font-weight: 500; }
+.theme-checker .logo-hero { width: 740px; }
+
+.theme-checker .btn {
+  margin-top: 34px;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 56px;
+  color: #fff;
+  background: var(--purple);
+  border: 5px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.theme-checker .btn:active { box-shadow: 2px 2px 0 var(--ink); transform: translate(6px, 6px); }
+
+/* ----- Question ----- */
+.theme-checker .q-text {
+  margin-top: 10px;
+  width: 1300px;
+  min-height: 140px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 52px;
+  line-height: 1.25;
+  color: var(--ink);
+  text-shadow: none;
+}
+
+/* Pilules violettes : « A. » + texte */
+.theme-checker .options { width: 1000px; gap: 30px; margin-top: 20px; }
+.theme-checker .option {
+  height: 100px;
+  gap: 22px;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 44px;
+  color: #fff;
+}
+.theme-checker .option .letter,
+.theme-checker .option > span:last-child {
+  height: 100px;
+  border-radius: 999px;
+  background: var(--purple);
+  border: none;
+  color: #fff;
+  box-shadow: 0 6px 0 var(--purple-dark);
+  transition: background .25s, box-shadow .25s;
+}
+.theme-checker .option .letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 44px;
+}
+.theme-checker .option .letter::after { content: "."; }
+.theme-checker .option > span:last-child { flex: 1; display: grid; place-items: center; padding: 0 30px; text-align: center; }
+
+.theme-checker .option.picked .letter,
+.theme-checker .option.picked > span:last-child { background: var(--ink); box-shadow: 0 6px 0 #000; }
+
+.theme-checker.phase-reveal .option.correct { background: none; }
+.theme-checker.phase-reveal .option.correct .letter,
+.theme-checker.phase-reveal .option.correct > span:last-child { background: var(--good); box-shadow: 0 6px 0 #15803d; }
+.theme-checker.phase-reveal .option.picked:not(.correct) { background: none; filter: none; opacity: .9; }
+.theme-checker.phase-reveal .option.picked:not(.correct) .letter,
+.theme-checker.phase-reveal .option.picked:not(.correct) > span:last-child { background: var(--bad); box-shadow: 0 6px 0 #b91c1c; }
+
+/* Devinettes (texte seul) : réponses plus grandes et centrées dans la carte */
+.theme-checker:not(.layout-shape):not(.layout-guess) .q-body .options { margin-top: 70px; gap: 44px; }
+.theme-checker:not(.layout-shape):not(.layout-guess) .q-body .option { height: 118px; font-size: 50px; }
+.theme-checker:not(.layout-shape):not(.layout-guess) .q-body .option .letter,
+.theme-checker:not(.layout-shape):not(.layout-guess) .q-body .option > span:last-child { height: 118px; }
+
+/* Cartes 3D (question « quelle forme ? ») : bien plus grandes */
+.theme-checker .options.cards { width: auto; gap: 44px; margin-top: 16px; }
+.theme-checker .option.card3d {
+  width: 460px;
+  height: 540px;
+  background: var(--lilac);
+  border: 6px solid var(--purple);
+  border-radius: 40px;
+  box-shadow: 0 10px 0 var(--purple-dark);
+}
+.theme-checker .card3d .letter { position: absolute; top: 18px; left: 18px; width: 110px; height: 72px; font-size: 38px; }
+.theme-checker .card3d .obj { width: 100%; height: 460px; }
+.theme-checker.phase-reveal .option.card3d.correct { animation: none; transform: scale(1.02); }
+.theme-checker .card3d .name {
+  height: 66px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  color: var(--purple-dark);
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+.theme-checker .option.card3d.picked { background: var(--lilac); border-color: var(--ink); }
+.theme-checker.phase-reveal .option.card3d.correct { background: #dcfce7; border-color: var(--good); box-shadow: 0 10px 0 #15803d; }
+.theme-checker.phase-reveal .option.card3d.correct .name { color: #15803d; }
+.theme-checker.phase-reveal .option.card3d.picked:not(.correct) { background: #fee2e2; border-color: var(--bad); }
+
+/* Question « quel goût ? » : grand objet 3D + pilules */
+.theme-checker .q-body { gap: 60px; }
+.theme-checker .hero3d { width: 600px; height: 600px; }
+.theme-checker.layout-guess .q-body .options { width: 760px; }
+.theme-checker .hero3d::before,
+.theme-checker .answer3d::before { background: radial-gradient(circle, rgba(138, 77, 255, .22), rgba(138, 77, 255, 0) 66%); }
+
+/* ----- Réponse : juste le modèle 3D, très grand et centré, et la réponse ----- */
+.theme-checker.phase-explain .q-text { display: none; }
+.theme-checker .explain.split { margin-top: 0; height: 100%; }
+/* Le modèle occupe presque toute la hauteur de l'écran, il dépasse même de la carte blanche */
+.theme-checker .answer3d {
+  position: absolute;
+  left: 50%;
+  top: -170px;
+  width: 1300px;
+  height: 930px;
+  margin-left: -650px;
+}
+.theme-checker .answer3d::before { inset: 0 185px; }
+/* L'étiquette de réponse reste par-dessus, en bas de la carte */
+.theme-checker .explain-col { position: absolute; left: 0; right: 0; bottom: 4px; width: auto; z-index: 3; }
+.theme-checker .explain-col .card { display: none; }
+.theme-checker .explain-col .answer-big {
+  padding: 6px 60px 14px;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 68px;
+  color: var(--purple);
+  background: #fff;
+  border: 6px solid var(--ink);
+  border-radius: 28px;
+  box-shadow: 8px 8px 0 var(--ink);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
+/* ----- Chrono ----- */
+.theme-checker .timer {
+  bottom: 0;
+  width: 900px;
+  height: 38px;
+  padding: 6px;
+  background: var(--lilac);
+  border: 4px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.theme-checker .timer-fill { background: var(--purple); box-shadow: none; }
+.theme-checker .timer-fill.warn { background: #ff9f1c; }
+.theme-checker .timer-fill.danger { background: var(--bad); }
+
+/* ----- Divers ----- */
+.theme-checker .paused-flag { top: 60px; right: 250px; background: var(--ink); font-family: "Archivo Black", sans-serif; color: #fff; }
+.theme-checker .splash .s1 { fill: var(--purple); }
+.theme-checker .splash .s2 { fill: var(--ink); }

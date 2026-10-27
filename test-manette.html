@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test manette</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body { min-height: 100vh; padding: 32px 16px; background: #f3edff; color: #1c1c1c; font-family: system-ui, sans-serif; }
+    main { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+    h1 { font-size: 28px; }
+    .status { padding: 16px 20px; border: 3px solid #1c1c1c; border-radius: 16px; background: #fff; font-size: 20px; font-weight: 600; }
+    .status.ok { background: #dcfce7; border-color: #15803d; }
+    .status.wait { background: #fff7d6; border-color: #b8860b; }
+    .pad { padding: 16px 20px; border: 3px solid #1c1c1c; border-radius: 16px; background: #fff; }
+    .pad h2 { font-size: 18px; margin-bottom: 4px; word-break: break-word; }
+    .pad p { color: #555; font-size: 14px; margin-bottom: 10px; }
+    .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .b { min-width: 42px; padding: 6px 8px; text-align: center; border: 2px solid #1c1c1c; border-radius: 8px; font-size: 13px; font-weight: 700; background: #eee; }
+    .b.on { background: #22c55e; color: #fff; }
+    .axis { width: 120px; font-size: 13px; }
+    .axis div { height: 10px; margin-top: 3px; background: #ddd; border-radius: 5px; position: relative; }
+    .axis i { position: absolute; top: -2px; width: 4px; height: 14px; background: #8a4dff; border-radius: 2px; }
+    ol { padding-left: 22px; line-height: 1.6; }
+    code { background: #fff; padding: 1px 6px; border-radius: 6px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Test de la manette – Flavolo Quizz</h1>
+    <div class="status wait" id="status">Clique une fois dans cette page, puis appuie sur un bouton de la manette…</div>
+    <div id="pads"></div>
+    <div class="pad">
+      <h2>Rien ne s'affiche avec Brave ?</h2>
+      <ol>
+        <li>Clique dans la page, puis appuie sur <b>A</b> (le navigateur ne montre la manette qu'après un appui, page au premier plan).</li>
+        <li>Clique sur le <b>lion Brave</b> à droite de la barre d'adresse et <b>désactive les Shields</b> pour ce site (localhost), puis recharge la page.</li>
+        <li>Si ça ne marche toujours pas : ouvre <code>brave://settings/shields</code> et mets « Bloquer le fingerprinting » sur <b>désactivé</b> pendant le jeu.</li>
+        <li>Débranche et rebranche la manette, puis réappuie sur un bouton.</li>
+        <li>Vérifie que Windows la voit : touche Windows, tape <code>joy.cpl</code> (« Configurer les contrôleurs de jeu USB »).</li>
+        <li>Essaie la même page dans <b>Chrome</b> ou <b>Edge</b> : si elle marche là-bas, c'est un réglage de Brave.</li>
+      </ol>
+    </div>
+  </main>
+  <script>
+    const status = document.getElementById("status");
+    const box = document.getElementById("pads");
+    const NAMES = ["A", "B", "X", "Y", "LB", "RB", "LT", "RT", "View", "Start", "L3", "R3", "↑", "↓", "←", "→", "Home"];
+
+    if (!navigator.getGamepads) {
+      status.className = "status";
+      status.textContent = "Ce navigateur ne donne pas accès aux manettes (API Gamepad absente ou bloquée).";
+    }
+
+    function draw() {
+      let pads = [];
+      try { pads = [...navigator.getGamepads()].filter(Boolean); } catch (e) {
+        status.className = "status";
+        status.textContent = "Accès aux manettes bloqué par le navigateur : " + e.message;
+      }
+      if (pads.length) {
+        status.className = "status ok";
+        status.textContent = `${pads.length} manette(s) détectée(s) ! Appuie sur les boutons : ils doivent s'allumer en vert.`;
+      }
+      box.innerHTML = pads.map((p) => `
+        <div class="pad">
+          <h2>n° ${p.index} – ${p.id}</h2>
+          <p>Disposition : ${p.mapping === "standard" ? "standard (Xbox / PlayStation) ✔" : "générique (le jeu s'adapte)"} · ${p.buttons.length} boutons · ${p.axes.length} axes</p>
+          <div class="row">${p.buttons.map((b, i) => `<span class="b ${b.pressed || b.value > 0.5 ? "on" : ""}">${p.mapping === "standard" ? NAMES[i] || i : i}</span>`).join("")}</div>
+          <div class="row">${p.axes.map((v, i) => `<div class="axis">Axe ${i} : ${v.toFixed(2)}<div><i style="left:${Math.min(100, Math.max(0, ((v + 1) / 2) * 100))}%"></i></div></div>`).join("")}</div>
+        </div>`).join("");
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+    addEventListener("gamepadconnected", (e) => console.log("Manette connectée :", e.gamepad.id));
+  </script>
+</body>
+</html>

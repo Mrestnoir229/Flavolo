@@ -1,0 +1,653 @@
+/* ===== Super-héros du goût : effets spéciaux, score, fiche héros et album =====
+   Complète theme-checker.css (gouts.html). Coordonnées dans la scène fixe 1920x1080. */
+
+#stage { --hero: #8a4dff; }
+
+/* ----- Calque d'effets (confettis, étincelles, feux d'artifice) ----- */
+.fx {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* ----- Tremblement de l'écran (la propriété « translate » ne touche pas à la mise à l'échelle) ----- */
+#stage.shake { animation: shake .4s ease-out; }
+#stage.shake-strong { animation: shakeStrong .65s ease-out; }
+@keyframes shake {
+  0%, 100% { translate: 0 0; }
+  20% { translate: -12px 6px; }
+  40% { translate: 10px -7px; }
+  60% { translate: -7px 4px; }
+  80% { translate: 4px -2px; }
+}
+@keyframes shakeStrong {
+  0%, 100% { translate: 0 0; }
+  10% { translate: -26px 12px; }
+  25% { translate: 22px -16px; }
+  40% { translate: -16px 10px; }
+  55% { translate: 12px -6px; }
+  70% { translate: -7px 4px; }
+  85% { translate: 3px -2px; }
+}
+
+/* ----- Bulle de BD « POW ! » ----- */
+.pow {
+  position: absolute;
+  width: 560px;
+  height: 380px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 16;
+  transform: translate(-50%, -50%) scale(0) rotate(-30deg);
+  transition: transform .2s ease-in;
+}
+.pow.show {
+  transform: translate(-50%, -50%) scale(1) rotate(var(--tilt, -6deg));
+  transition: transform .5s cubic-bezier(.2, 1.9, .4, 1);
+}
+.pow svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.pow-back { fill: #1c1c1c; transform: translate(2.5px, 3px); }
+.pow-front { fill: var(--pow, #ffc400); stroke: #1c1c1c; stroke-width: 2.2; stroke-linejoin: round; }
+.pow span {
+  position: relative;
+  white-space: nowrap;
+  font-family: "Bangers", "Anton", sans-serif;
+  font-size: 92px;
+  letter-spacing: 3px;
+  color: #fff;
+  -webkit-text-stroke: 12px #1c1c1c;
+  paint-order: stroke fill;
+  text-shadow: 0 7px 0 #1c1c1c;
+}
+.pow.show span { animation: powText .6s cubic-bezier(.2, 1.8, .4, 1) both; }
+@keyframes powText { from { transform: scale(.4); } to { transform: scale(1); } }
+
+/* ----- Points qui s'envolent ----- */
+.float-points {
+  position: absolute;
+  z-index: 17;
+  pointer-events: none;
+  font-family: "Bangers", sans-serif;
+  font-size: 96px;
+  letter-spacing: 2px;
+  color: #ffc400;
+  -webkit-text-stroke: 12px #1c1c1c;
+  paint-order: stroke fill;
+  animation: floatUp 1.4s cubic-bezier(.2, 1.2, .4, 1) forwards;
+}
+@keyframes floatUp {
+  0%   { transform: translate(-50%, -50%) scale(.3); opacity: 0; }
+  20%  { transform: translate(-50%, -90%) scale(1.3); opacity: 1; }
+  70%  { transform: translate(-50%, -170%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -230%) scale(.8); opacity: 0; }
+}
+
+/* ----- Score et combo ----- */
+.hud {
+  position: absolute;
+  top: 46px;
+  right: 250px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  z-index: 6;
+}
+.phase-intro .hud, .phase-part .hud, .phase-end .hud { display: none; }
+
+.hud-score {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 30px 4px 12px;
+  background: #fff;
+  border: 5px solid #1c1c1c;
+  border-radius: 999px;
+  box-shadow: 6px 6px 0 #1c1c1c;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 46px;
+  color: #1c1c1c;
+}
+.hud-score svg { width: 58px; height: 58px; fill: #ffc400; stroke: #1c1c1c; stroke-width: 1.6; stroke-linejoin: round; animation: spinStar 6s linear infinite; }
+.hud-score b { min-width: 110px; font-weight: 400; }
+@keyframes spinStar { to { transform: rotate(360deg); } }
+
+.hud-combo {
+  padding: 4px 22px;
+  font-family: "Bangers", sans-serif;
+  font-size: 46px;
+  letter-spacing: 2px;
+  color: #fff;
+  background: linear-gradient(#ff7a3d, #ff3b1f);
+  border: 5px solid #1c1c1c;
+  border-radius: 16px;
+  box-shadow: 6px 6px 0 #1c1c1c;
+  transform: scale(0) rotate(-4deg);
+  transition: transform .3s;
+}
+.hud-combo.on { transform: scale(1) rotate(-4deg); }
+.hud-combo.bump { animation: bump .6s cubic-bezier(.2, 1.8, .4, 1); }
+@keyframes bump { 0% { transform: scale(1.8) rotate(-12deg); } 100% { transform: scale(1) rotate(-4deg); } }
+
+/* ----- Bouton son ----- */
+.sound-btn {
+  position: absolute;
+  right: 40px;
+  bottom: 40px;
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: var(--purple, #8a4dff);
+  border: 5px solid #1c1c1c;
+  border-radius: 50%;
+  box-shadow: 5px 5px 0 #1c1c1c;
+  cursor: pointer;
+  z-index: 7;
+}
+.sound-btn svg { width: 54px; height: 54px; fill: currentColor; }
+.sound-btn .cross { display: none; }
+#stage.muted .sound-btn .wave { display: none; }
+#stage.muted .sound-btn .cross { display: inline; }
+#stage.muted .sound-btn { background: #6b6b7b; }
+
+/* ----- Accueil : deux héros 3D de part et d'autre du logo ----- */
+.theme-checker .logo-hero { width: 660px; }
+.intro-hero {
+  position: absolute;
+  top: 70px;
+  width: 440px;
+  height: 500px;
+  animation: riseIn .8s 1.4s cubic-bezier(.2, 1.3, .4, 1) both;
+}
+.intro-hero.left { left: -60px; }
+.intro-hero.right { right: -60px; }
+.intro-hero canvas { display: block; }
+
+.intro-mission {
+  margin-top: 12px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 34px;
+  color: #1c1c1c;
+  animation: riseIn .6s 1.2s cubic-bezier(.2, 1.3, .4, 1) both;
+}
+.intro-mission b {
+  font-family: "Bangers", sans-serif;
+  font-weight: 400;
+  font-size: 46px;
+  letter-spacing: 2px;
+  color: var(--purple, #8a4dff);
+}
+.theme-checker .intro .btn { animation: riseIn .6s 1.3s cubic-bezier(.2, 1.3, .4, 1) both, pulse 1.6s 2s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+
+/* ----- Cartes 3D : elles se soulèvent au survol, la mauvaise carte tremble ----- */
+.theme-checker.phase-question .option.card3d:hover {
+  transform: translateY(-14px) rotate(-1.5deg) scale(1.03);
+  border-color: #1c1c1c;
+  box-shadow: 0 22px 0 var(--purple-dark), 0 30px 50px rgba(60, 20, 130, .35);
+}
+.theme-checker.phase-question .option:not(.card3d):hover { transform: scale(1.04) rotate(-.6deg); }
+.option.nope { animation: nope .5s ease-in-out both !important; }
+@keyframes nope {
+  0%, 100% { translate: 0 0; }
+  20% { translate: -18px 0; rotate: -3deg; }
+  40% { translate: 16px 0; rotate: 3deg; }
+  60% { translate: -10px 0; rotate: -2deg; }
+  80% { translate: 6px 0; rotate: 0deg; }
+}
+.theme-checker.phase-reveal .option.correct { animation: winGlow 1s ease-in-out infinite alternate; }
+@keyframes winGlow {
+  from { filter: drop-shadow(0 0 0 rgba(34, 197, 94, 0)); }
+  to { filter: drop-shadow(0 0 26px rgba(34, 197, 94, .85)); }
+}
+
+/* Chrono qui panique dans les 3 dernières secondes */
+.theme-checker .timer:has(.danger) { animation: panic .5s ease-in-out infinite; }
+@keyframes panic { 50% { transform: translateX(-50%) scale(1.06); } }
+
+/* ----- Réponse : le super-héros, sa fiche à gauche, sa bulle à droite ----- */
+.hero-sheet, .hero-bubble { display: none; }
+.phase-explain.has-hero .hero-sheet,
+.phase-explain.has-hero .hero-bubble { display: block; }
+
+.hero-sheet {
+  position: absolute;
+  left: -10px;
+  top: 120px;
+  width: 370px;
+  padding: 50px 26px 26px;
+  background: #fff;
+  border: 6px solid #1c1c1c;
+  border-top: 26px solid var(--hero);
+  border-radius: 30px;
+  box-shadow: 9px 9px 0 #1c1c1c;
+  z-index: 3;
+  animation: sheetIn .7s .35s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+@keyframes sheetIn { from { transform: translateX(-480px) rotate(-12deg); } to { transform: rotate(-2deg); } }
+
+.hero-ribbon {
+  position: absolute;
+  top: -42px;
+  left: 50%;
+  translate: -50% 0;
+  padding: 2px 22px;
+  white-space: nowrap;
+  font-family: "Bangers", sans-serif;
+  font-size: 38px;
+  letter-spacing: 2px;
+  color: #fff;
+  background: #1c1c1c;
+  border-radius: 12px;
+  rotate: -3deg;
+}
+.hero-ribbon.won {
+  background: linear-gradient(100deg, #22c55e 40%, #a7f3c0 50%, #22c55e 60%) 0 0 / 300% 100%;
+  border: 4px solid #1c1c1c;
+  animation: ribbonShine 2s linear infinite;
+}
+@keyframes ribbonShine { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+.hero-name {
+  font-family: "Bangers", sans-serif;
+  font-size: 60px;
+  line-height: .95;
+  letter-spacing: 2px;
+  text-align: center;
+  color: var(--hero);
+  -webkit-text-stroke: 2px #1c1c1c;
+  text-shadow: 4px 4px 0 #1c1c1c;
+}
+.hero-power {
+  margin: 12px 0 20px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 23px;
+  line-height: 1.3;
+  text-align: center;
+  color: #1c1c1c;
+}
+.hero-gauges { display: flex; flex-direction: column; gap: 12px; }
+.gauge {
+  display: grid;
+  grid-template-columns: 74px 1fr 82px;
+  align-items: center;
+  gap: 8px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: #6b6b7b;
+}
+.gauge span:first-child { text-align: right; }
+.pips { display: flex; gap: 5px; }
+.pips i {
+  flex: 1;
+  height: 24px;
+  border: 3px solid #1c1c1c;
+  border-radius: 7px;
+  background: #efe9ff;
+}
+.pips i.on { background: var(--hero); animation: pipIn .4s cubic-bezier(.2, 1.8, .4, 1) both; }
+@keyframes pipIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+.hero-bubble {
+  position: absolute;
+  right: -10px;
+  top: 150px;
+  width: 360px;
+  padding: 26px 28px 30px;
+  background: #fff;
+  border: 6px solid #1c1c1c;
+  border-radius: 36px;
+  box-shadow: 9px 9px 0 #1c1c1c;
+  z-index: 3;
+  animation: bubbleIn .6s .9s cubic-bezier(.2, 1.6, .4, 1) both;
+}
+@keyframes bubbleIn { from { transform: scale(0); transform-origin: 0 50%; } to { transform: rotate(1.5deg); } }
+/* la pointe de la bulle, tournée vers le héros */
+.hero-bubble::before {
+  content: "";
+  position: absolute;
+  left: -30px;
+  top: 90px;
+  width: 44px;
+  height: 44px;
+  background: #fff;
+  border-left: 6px solid #1c1c1c;
+  border-bottom: 6px solid #1c1c1c;
+  transform: rotate(45deg) skew(12deg, 12deg);
+}
+.hero-bubble p {
+  position: relative;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 27px;
+  line-height: 1.32;
+  color: #1c1c1c;
+}
+.hero-bubble p::before {
+  content: "LE SAIS-TU ?";
+  display: block;
+  margin-bottom: 6px;
+  font-family: "Bangers", sans-serif;
+  font-weight: 400;
+  font-size: 40px;
+  letter-spacing: 2px;
+  color: var(--hero);
+  -webkit-text-stroke: 1.5px #1c1c1c;
+}
+
+/* Halo de la couleur du héros derrière le modèle */
+.theme-checker.has-hero .answer3d::before {
+  background: radial-gradient(circle, color-mix(in srgb, var(--hero) 38%, transparent), transparent 62%);
+  animation: halo 2.4s ease-in-out infinite;
+}
+@keyframes halo { 50% { transform: scale(1.08); opacity: .75; } }
+
+/* ----- Fin : étoiles, score, album de cartes brillantes ----- */
+.theme-checker.phase-end .end { flex-direction: row; align-items: center; justify-content: center; gap: 46px; }
+.end-left { width: 500px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.end-title {
+  font-family: "Bangers", sans-serif;
+  font-weight: 400;
+  font-size: 100px;
+  line-height: .95;
+  letter-spacing: 3px;
+  color: var(--purple, #8a4dff);
+  -webkit-text-stroke: 3px #1c1c1c;
+  text-shadow: 6px 6px 0 #1c1c1c;
+  animation: zoomIn .7s cubic-bezier(.2, 1.6, .4, 1) both;
+}
+.end-stars { display: flex; gap: 14px; margin-top: 24px; filter: drop-shadow(5px 5px 0 #1c1c1c); }
+.end-stars i {
+  width: 120px;
+  height: 120px;
+  background: #e4dcf5;
+  clip-path: polygon(50% 0, 63% 35%, 100% 38%, 71% 61%, 81% 98%, 50% 77%, 19% 98%, 29% 61%, 0 38%, 37% 35%);
+}
+.end-stars i:nth-child(2) { translate: 0 -24px; }
+.end-stars i.on { background: linear-gradient(#ffe066, #ffb400); animation: starPop .6s cubic-bezier(.2, 1.9, .4, 1) both; }
+@keyframes starPop { from { transform: scale(2.6) rotate(-90deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.end-score { margin-top: 18px; font-family: "Archivo Black", sans-serif; font-size: 70px; line-height: 1; color: #1c1c1c; }
+.end-score:empty { display: none; }
+.theme-checker .end .intro-sub { margin-top: 10px; font-size: 28px; }
+.theme-checker .end .btn { margin-top: 26px; padding: 18px 56px; font-size: 48px; white-space: nowrap; }
+
+.end-right { width: 960px; }
+.album-title {
+  margin-bottom: 16px;
+  font-family: "Bangers", sans-serif;
+  font-size: 50px;
+  letter-spacing: 2px;
+  color: #1c1c1c;
+}
+.album-title span { color: var(--purple, #8a4dff); margin-left: 10px; }
+.album { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; perspective: 1200px; }
+
+.hero-card {
+  position: relative;
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--hero) 55%, #fff), var(--hero) 75%);
+  border: 5px solid #1c1c1c;
+  border-radius: 20px;
+  box-shadow: 6px 6px 0 #1c1c1c;
+  opacity: 0;
+}
+.hero-card.in { animation: cardIn .6s cubic-bezier(.2, 1.5, .4, 1) both; }
+@keyframes cardIn {
+  from { opacity: 0; transform: rotateY(100deg) scale(.6); }
+  to { opacity: 1; transform: none; }
+}
+.hero-card .art { width: 100%; height: 170px; }
+.hero-card .art img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.hero-card b {
+  font-family: "Bangers", sans-serif;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 1;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 0 6px;
+  color: #fff;
+  -webkit-text-stroke: 5px #1c1c1c;
+  paint-order: stroke fill;
+}
+.hero-card small {
+  margin-top: 4px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #1c1c1c;
+  background: rgba(255, 255, 255, .8);
+  padding: 0 10px;
+  border-radius: 999px;
+}
+
+/* Carte gagnée : reflet holographique comme une carte rare */
+.hero-card.got::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .7) 44%, rgba(255, 120, 220, .35) 50%, rgba(120, 220, 255, .35) 56%, transparent 70%) 0 0 / 300% 100%;
+  mix-blend-mode: overlay;
+  animation: holo 3s linear infinite;
+  pointer-events: none;
+}
+@keyframes holo { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+.hero-card.got:hover { transform: translateY(-8px) rotate(-2deg) scale(1.05); transition: transform .2s; }
+
+/* Carte pas encore gagnée : silhouette mystère */
+.hero-card:not(.got) { background: #2a2340; }
+.hero-card:not(.got) .art img { filter: brightness(0) opacity(.55); }
+.hero-card:not(.got) small { background: rgba(255, 255, 255, .25); color: #fff; }
+
+/* La lettre de la bonne réponse reste lisible sur le vert */
+.theme-checker.phase-reveal .option.correct .letter { color: #fff; }
+
+/* ===== Vol du héros jusqu'à la ligne du quiz (vol.js) ===== */
+.flight {
+  position: absolute;
+  inset: 0;
+  display: none;
+  overflow: hidden;
+  z-index: 10;
+  /* ciel du soir : bleu en haut, rose en bas, et un soleil doux */
+  background:
+    radial-gradient(circle at 78% 26%, rgba(255, 244, 200, .95) 0 70px, rgba(255, 214, 120, .45) 120px, transparent 260px),
+    linear-gradient(#4f7dff, #9b7bff 55%, #ffb9e2);
+}
+.phase-flight .flight { display: block; }
+.phase-flight .brand, .phase-flight .badge, .phase-flight .hud { display: none; }
+.flight canvas { position: absolute; inset: 0; display: block; }
+
+/* Barre de progression jusqu'à la ligne, et compteur d'étoiles */
+.fl-top {
+  position: absolute;
+  top: 34px;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+.fl-track {
+  position: relative;
+  width: 1000px;
+  height: 40px;
+  background: #fff;
+  border: 5px solid #1c1c1c;
+  border-radius: 999px;
+  box-shadow: 6px 6px 0 #1c1c1c;
+}
+.fl-fill {
+  position: absolute;
+  inset: 4px auto 4px 4px;
+  max-width: calc(100% - 8px);
+  border-radius: 999px;
+  background: repeating-linear-gradient(-45deg, #8a4dff 0 18px, #a77bff 18px 36px);
+  animation: stripes .6s linear infinite;
+}
+@keyframes stripes { to { background-position: 51px 0; } }
+.fl-me {
+  position: absolute;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: #ffc400;
+  border: 5px solid #1c1c1c;
+}
+.fl-goal {
+  position: absolute;
+  right: -26px;
+  top: 50%;
+  translate: 0 -50%;
+  padding: 2px 16px;
+  font-family: "Bangers", sans-serif;
+  font-size: 40px;
+  letter-spacing: 2px;
+  color: #fff;
+  background: repeating-conic-gradient(#1c1c1c 0 25%, #8a4dff 0 50%) 0 0 / 20px 20px;
+  border: 5px solid #1c1c1c;
+  border-radius: 12px;
+  -webkit-text-stroke: 6px #1c1c1c;
+  paint-order: stroke fill;
+}
+.fl-stars {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 26px 2px 10px;
+  background: #fff;
+  border: 5px solid #1c1c1c;
+  border-radius: 999px;
+  box-shadow: 6px 6px 0 #1c1c1c;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 40px;
+  color: #1c1c1c;
+}
+.fl-stars svg { width: 50px; height: 50px; fill: #ffc400; stroke: #1c1c1c; stroke-width: 1.6; stroke-linejoin: round; }
+.fl-stars b { font-weight: 400; min-width: 40px; }
+
+/* Panneau d'aide : comment piloter le héros */
+.fl-help {
+  position: absolute;
+  left: 50%;
+  bottom: 70px;
+  translate: -50% 0;
+  padding: 22px 40px 26px;
+  background: #fff;
+  border: 6px solid #1c1c1c;
+  border-radius: 34px;
+  box-shadow: 9px 9px 0 #1c1c1c;
+  transition: opacity .5s, transform .5s;
+  animation: riseIn .6s cubic-bezier(.2, 1.3, .4, 1) backwards; /* « backwards » : la classe .hide peut ensuite le cacher */
+}
+.fl-help.hide { opacity: 0; transform: translateY(60px); pointer-events: none; }
+.fl-title {
+  font-family: "Bangers", sans-serif;
+  font-size: 46px;
+  white-space: nowrap;
+  letter-spacing: 2px;
+  text-align: center;
+  color: #8a4dff;
+  -webkit-text-stroke: 2px #1c1c1c;
+}
+.fl-keys { display: flex; align-items: center; gap: 36px; margin-top: 10px; }
+.fl-pad { display: grid; grid-template-columns: repeat(3, 72px); gap: 8px; }
+.fl-pad kbd {
+  display: grid;
+  place-items: center;
+  height: 72px;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 40px;
+  color: #fff;
+  background: #8a4dff;
+  border: 4px solid #1c1c1c;
+  border-radius: 14px;
+  box-shadow: 0 6px 0 #1c1c1c;
+  animation: keyPress 1.6s ease-in-out infinite;
+}
+.fl-pad kbd:nth-of-type(2) { animation-delay: .4s; }
+.fl-pad kbd:nth-of-type(3) { animation-delay: .8s; }
+.fl-pad kbd:nth-of-type(4) { animation-delay: 1.2s; }
+@keyframes keyPress {
+  0%, 70%, 100% { transform: none; box-shadow: 0 6px 0 #1c1c1c; }
+  80% { transform: translateY(5px); box-shadow: 0 1px 0 #1c1c1c; background: #ffc400; }
+}
+.fl-keys ul { list-style: none; font-family: "Poppins", sans-serif; font-weight: 600; font-size: 28px; line-height: 1.45; color: #1c1c1c; }
+.fl-keys li b { font-family: "Archivo Black", sans-serif; font-weight: 400; color: #8a4dff; }
+.fl-keys li b.gold { color: #e0a800; }
+.fl-keys li b.red { color: #ff4a1f; }
+.fl-keys li b.grey { color: #55556e; }
+
+/* Compte à rebours 3, 2, 1, GO ! */
+.fl-count {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  translate: -50% -50%;
+  font-family: "Bangers", sans-serif;
+  font-size: 260px;
+  letter-spacing: 6px;
+  color: #ffc400;
+  -webkit-text-stroke: 22px #1c1c1c;
+  paint-order: stroke fill;
+  text-shadow: 0 14px 0 #1c1c1c;
+  opacity: 0;
+  pointer-events: none;
+}
+.fl-count.pop { animation: countPop .85s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes countPop {
+  0% { transform: scale(3); opacity: 0; }
+  25% { transform: scale(1); opacity: 1; }
+  75% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(.5); opacity: 0; }
+}
+
+/* Bouton pour passer le vol (présentateur) */
+.fl-skip {
+  position: absolute;
+  right: 160px;
+  bottom: 44px;
+  padding: 10px 30px;
+  font-family: "Archivo Black", sans-serif;
+  font-size: 30px;
+  color: #1c1c1c;
+  background: #fff;
+  border: 5px solid #1c1c1c;
+  border-radius: 999px;
+  box-shadow: 5px 5px 0 #1c1c1c;
+  cursor: pointer;
+}
+.fl-skip:hover { background: #ffc400; }
+
+/* ===== Manette ===== */
+/* Réponse sélectionnée au stick / à la croix */
+.theme-checker .option.pad-focus { transform: scale(1.05) rotate(-.6deg); filter: drop-shadow(0 0 0 #ffc400) drop-shadow(0 0 18px rgba(255, 196, 0, .9)); }
+.theme-checker .option.pad-focus .letter,
+.theme-checker .option.pad-focus > span:last-child { background: #1c1c1c; box-shadow: 0 6px 0 #ffc400; }
+.theme-checker .option.card3d.pad-focus {
+  transform: translateY(-14px) rotate(-1.5deg) scale(1.03);
+  border-color: #ffc400;
+  border-width: 10px;
+  box-shadow: 0 16px 0 #1c1c1c, 0 30px 50px rgba(60, 20, 130, .35);
+}
+.theme-checker .option.card3d.pad-focus > span:last-child { background: none; box-shadow: none; }
+/* l'aide manette n'apparaît que lorsqu'une manette est branchée */
+.theme-checker .pad-hint { display: none; margin-top: 4px; color: #15803d; font-weight: 700; }
+#stage.pad-on .pad-hint { display: block; }
